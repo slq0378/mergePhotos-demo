@@ -147,6 +147,7 @@
     }
 }
 
+
 // 获得待合成图片
 - (UIImage *)mergeImages:(UIImage *)mergeImage
 {
@@ -154,7 +155,28 @@
     UIImage *postImage = [self getImageFromView];
     // 获取位图上下文
     UIGraphicsBeginImageContextWithOptions(CGSizeMake(ScreenWidth, postImage.size.height + ScreenHeight - self.textImage.size.height), NO, 0.0);
-    [newimage drawInRect:CGRectMake(0, postImage.size.height, ScreenWidth, ScreenHeight - self.textImage.size.height)];
+    [newimage drawInRect:CGRectMake(0, 0, ScreenWidth, ScreenHeight)];
+    NSString *str = @"2016-06-06";
+    
+    [str drawAtPoint:CGPointMake(0, 0) withAttributes:@{NSForegroundColorAttributeName:[UIColor redColor]}];
+//    [str drawAtPoint:CGPointMake(0,0) withFont:[UIFont systemFontOfSize:22]];
+//    [postImage drawAtPoint:CGPointMake(0,0)];
+    // 获取位图
+    UIImage *saveimage = UIGraphicsGetImageFromCurrentImageContext();
+    // 关闭位图上下文
+    UIGraphicsEndImageContext();
+    // 保存图片，需要转换成二进制数据
+    [self saveImageToPhotos:saveimage];
+    return saveimage;
+}
+// 获得待合成图片
+- (UIImage *)mergeImages1:(UIImage *)mergeImage
+{
+    UIImage *newimage = mergeImage;
+    UIImage *postImage = [self getImageFromView];
+    // 获取位图上下文
+    UIGraphicsBeginImageContextWithOptions(CGSizeMake(ScreenWidth, postImage.size.height + ScreenHeight - self.textImage.size.height), NO, 0.0);
+    [newimage drawInRect:CGRectMake(0, 0, ScreenWidth, ScreenHeight - self.textImage.size.height)];
 
     [postImage drawAtPoint:CGPointMake(0,0)];
     // 获取位图

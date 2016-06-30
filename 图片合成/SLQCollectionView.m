@@ -133,7 +133,8 @@ UINavigationControllerDelegate
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
     
     UIImage *photo = info[UIImagePickerControllerOriginalImage];
-    [self.photoArr addObject:photo];
+    UIImage *resultImage = [self mergeImages:photo];
+    [self.photoArr addObject:resultImage];
     
     [self getHeight];
     
@@ -143,7 +144,53 @@ UINavigationControllerDelegate
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker{
     [_imagePickerController dismissViewControllerAnimated:YES completion:nil];
 }
+// 获得待合成图片
+- (UIImage *)mergeImages:(UIImage *)mergeImage
+{
+    UIImage *newimage = mergeImage;
+//    UIImage *postImage = [self gestImageFromView];
+    // 获取位图上下文
+    UIGraphicsBeginImageContextWithOptions(CGSizeMake(ScreenWidth,ScreenHeight), NO, 0.0);
+    [newimage drawInRect:CGRectMake(0, 0, ScreenWidth, ScreenHeight)];
+    
+    // 设置当前时间
+    NSDateFormatter *dateformatter = [[NSDateFormatter alloc] init];
+    dateformatter.dateFormat = @"YYYY-MM-dd HH:mm:ss";
+    NSDate *currentDate = [NSDate date];
+    NSString *createTime = [dateformatter stringFromDate:currentDate];
+    
+    [createTime drawAtPoint:CGPointMake(0, 0) withAttributes:@{NSForegroundColorAttributeName:[UIColor redColor]}];
+    //    [str drawAtPoint:CGPointMake(0,0) withFont:[UIFont systemFontOfSize:22]];
+    //    [postImage drawAtPoint:CGPointMake(0,0)];
+    // 获取位图
+    UIImage *saveimage = UIGraphicsGetImageFromCurrentImageContext();
+    // 关闭位图上下文
+    UIGraphicsEndImageContext();
+    // 保存图片，需要转换成二进制数据
+    [self saveImageToPhotos:saveimage];
+    return saveimage;
+}
 
+- (void)saveImageToPhotos:(UIImage*)savedImage
+{
+    UIImageWriteToSavedPhotosAlbum(savedImage, self, @selector(image:didFinishSavingWithError:contextInfo:), NULL);
+}
+// 指定回调方法
+- (void)image: (UIImage *) image didFinishSavingWithError: (NSError *) error contextInfo: (void *) contextInfo
+{
+    NSString *msg = nil ;
+    if(error != NULL){
+        msg = @"保存图片失败" ;
+    }else{
+        msg = @"保存图片成功" ;
+    }
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"保存图片结果提示"
+                                                    message:msg
+                                                   delegate:self
+                                          cancelButtonTitle:@"确定"
+                                          otherButtonTitles:nil];
+    [alert show];
+}
 
 #pragma mark - UICollectionViewDataSource
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
